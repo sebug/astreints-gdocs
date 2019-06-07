@@ -70,11 +70,12 @@ function getNewToken(oAuth2Client, callback) {
 }
 
 /**
- * Prints the names and majors of students in a sample spreadsheet:
+ * Gets JSON for the different groups
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
 function listMajors(auth) {
+    const groups = {};
   const sheets = google.sheets({version: 'v4', auth});
   sheets.spreadsheets.values.get({
     spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY',
@@ -82,11 +83,15 @@ function listMajors(auth) {
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const rows = res.data.values;
-    if (rows.length) {
-      console.log('Prénom, Nom, Numéro');
-      rows.map((row) => {
-          console.log(`${row[0]}, ${row[1]}, ${row[2]}`);
-      });
+      if (rows.length) {
+	  groups.TestNotifPolycom = rows.map((row) => {
+	      return {
+		  firstName: row[0],
+		  lastName: row[1],
+		  number: row[2]
+	      };
+	  });
+	  console.log(JSON.stringify(groups));
     } else {
       console.log('No data found.');
     }
