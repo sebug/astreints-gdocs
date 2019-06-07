@@ -1,0 +1,22 @@
+{
+  "name": "astreints-gdocs",
+  "version": "1.0.0",
+  "description": "Get a list of people from google docs and transform them to JSON",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebug/astreints-gdocs.git"
+  },
+  "author": "Sebastian Gfeller",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sebug/astreints-gdocs/issues"
+  },
+  "homepage": "https://github.com/sebug/astreints-gdocs#readme",
+  "dependencies": {
+    "googleapis": "^39.2.0"
+  }
+}
