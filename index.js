@@ -16,7 +16,7 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Sheets API.
-  authorize(JSON.parse(content), listMajors);
+  authorize(JSON.parse(content), listAstreints);
 });
 
 /**
@@ -69,31 +69,69 @@ function getNewToken(oAuth2Client, callback) {
   });
 }
 
+function getAstreintsFromSheet(auth, sheetName) {
+    return new Promise((resolve, reject) => {
+	const sheets = google.sheets({version: 'v4', auth});
+	sheets.spreadsheets.values.get({
+	    spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY',
+	    range: 'TestNotifPolycom!A2:C',
+	}, (err, res) => {
+	    if (err) {
+		reject('The API returned an error: ' + err);
+		return;
+	    }
+	    const rows = res.data.values;
+	    if (rows.length) {
+		resolve({
+		    sheetName: sheetName,
+		    rows: rows.map((row) => {
+			let r = {
+			    firstName: row[0],
+			    lastName: row[1],
+			    number: row[2]
+			};
+			if (r.number.toString().indexOf('00') === 0) {
+			    r.number = '+' + r.number.substr(2);
+			}
+			return r;
+		    })
+		});
+	    } else {
+		resolve({
+		    sheetName: sheetName,
+		    rows: []
+		});
+	    }
+	});
+    });
+}
+
 /**
  * Gets JSON for the different groups
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-function listMajors(auth) {
+function listAstreints(auth) {
     const groups = {};
-  const sheets = google.sheets({version: 'v4', auth});
-  sheets.spreadsheets.values.get({
-    spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY',
-    range: 'TestNotifPolycom!A2:C',
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    const rows = res.data.values;
-      if (rows.length) {
-	  groups.TestNotifPolycom = rows.map((row) => {
-	      return {
-		  firstName: row[0],
-		  lastName: row[1],
-		  number: row[2]
-	      };
-	  });
-	  console.log(JSON.stringify(groups));
-    } else {
-      console.log('No data found.');
-    }
-  });
+    const sheets = google.sheets({version: 'v4', auth});
+    sheets.spreadsheets.get({
+	spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY'
+    }, (err, res) => {
+	if (err) {
+	  return console.log('The API returned an error: ' + err);
+	}
+	const sheetNames = res.data.sheets.map((sheet) => {
+	    return sheet.properties.title;
+	});
+	const sheetPromises = sheetNames.map((name) => {
+	    return getAstreintsFromSheet(auth, name);
+	});
+	Promise.all(sheetPromises).then(function (results) {
+	    const groups = {};
+	    for (let sheet of results) {
+		groups[sheet.sheetName] = sheet.rows;
+	    }
+	    console.log(JSON.stringify(groups));
+	});
+    });
 }
