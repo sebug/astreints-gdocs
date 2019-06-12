@@ -73,7 +73,7 @@ function getAstreintsFromSheet(auth, sheetName) {
     return new Promise((resolve, reject) => {
 	const sheets = google.sheets({version: 'v4', auth});
 	sheets.spreadsheets.values.get({
-	    spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY',
+	    spreadsheetId: process.env.GOOGLE_SHEET_ID,
 	    range: 'TestNotifPolycom!A2:C',
 	}, (err, res) => {
 	    if (err) {
@@ -115,7 +115,7 @@ function listAstreints(auth) {
     const groups = {};
     const sheets = google.sheets({version: 'v4', auth});
     sheets.spreadsheets.get({
-	spreadsheetId: '1dUMmkTSxyzGJWoSARfyTkJO6hGlZ8fo8DB3tAXLxihY'
+	spreadsheetId: process.env.GOOGLE_SHEET_ID
     }, (err, res) => {
 	if (err) {
 	  return console.log('The API returned an error: ' + err);
