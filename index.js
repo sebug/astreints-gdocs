@@ -74,7 +74,7 @@ function getAstreintsFromSheet(auth, sheetName) {
 	const sheets = google.sheets({version: 'v4', auth});
 	sheets.spreadsheets.values.get({
 	    spreadsheetId: process.env.GOOGLE_SHEET_ID,
-	    range: 'TestNotifPolycom!A2:C',
+	    range: sheetName + '!A2:C',
 	}, (err, res) => {
 	    if (err) {
 		reject('The API returned an error: ' + err);
@@ -90,7 +90,7 @@ function getAstreintsFromSheet(auth, sheetName) {
 			    lastName: row[1],
 			    number: row[2]
 			};
-			if (r.number.toString().indexOf('00') === 0) {
+			if (r.number && r.number.toString().indexOf('00') === 0) {
 			    r.number = '+' + r.number.substr(2);
 			}
 			return r;
